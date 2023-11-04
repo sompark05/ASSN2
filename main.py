@@ -83,7 +83,7 @@ def print_score_board(score_list):
 │ 6:          {x_to_blank(score_list[5][0])}      │ 6:          {x_to_blank(score_list[5][1])}      │
 ├───────────────────────────────────────────┤                     
 │ Sub total: {sub_total[0]:2d}/63    │ Sub total: {sub_total[1]:2d}/63    │
-│ +35 bonus: {player_bonus}         │ +35 bonus: {com_bonus}          │
+│ +35 bonus: {player_bonus}         │ +35 bonus: {com_bonus}         │
 ├───────────────────────────────────────────┤                     
 │ C:          {x_to_blank(score_list[6][0])}      │ C:          {x_to_blank(score_list[6][1])}      │
 ├───────────────────────────────────────────┤
@@ -102,6 +102,10 @@ def load_file2list(filename):
     with open(filename, "r") as fr:
         for l in fr:
             a, b, c = l.split()
+            if b != 'x':
+                b = int(b)
+            if c != 'x':
+                c = int(c)
             score_list.append([b, c])
     return score_list        
 
@@ -121,10 +125,55 @@ def check_error(score_list):
     if len(score_list) != 12:
         return True
     for i in range(1, 7):
-        if score_list[i-1][0] not in [i, i*2, i*3, i*4, i*5]:
+        for j in range(2):
+            if score_list[i-1][j] == "x":
+                continue
+            if score_list[i-1][j] not in [0, i, i*2, i*3, i*4, i*5] and score_list[i-1][j] != -1:
+                print("here", i)
+                return True
+    
+    if score_list[6][0] == "x":
+        pass
+    elif (score_list[6][0] < 5 or score_list[6][0] > 30) and score_list[6][0] != 0:   # c
+        print("player C error")
+        return True
+    
+    if score_list[6][1] == "x":
+        pass
+    elif (score_list[6][1] < 20 or score_list[6][1] > 30) and score_list[6][1] != 0:
+        print("com C error")
+        return True
+
+    for k in range(2):
+        if score_list[7][k] == "x":
+            pass
+        elif (score_list[7][k] < 5 or score_list[7][k] > 30) and score_list[7][k] != 0:   # 4K
+            print("4k error")
             return True
-        if score_list[i-1][1] not in [i, i*2, i*3, i*4, i*5]:
+        
+        if score_list[8][k] == "x":
+            pass
+        elif (score_list[8][k] < 5 or score_list[8][k] > 30)and score_list[8][k] != 0:   # FH
+            print("FH error")
             return True
+        
+        if score_list[9][k] == "x":
+            pass
+        elif score_list[9][k] != 0 and score_list[9][k] != 15: # SS
+            print(" SS error")
+            return True
+        if score_list[10][k] == "x":
+            pass
+        elif score_list[10][k] != 0 and score_list[10][k] != 30: # LS
+            print(" LS error")
+            return True
+        if score_list[11][k] == "x":
+            pass
+        elif score_list[11][k] != 0 and score_list[11][k] != 50: # Y
+            return True
+
+    return False
+    
     
 
 
@@ -225,14 +274,18 @@ def computer_pattern(dice_set, score_list):
 
 
 
-def new_game(score_list):
+def start_game(score_list):
     global total
     category_list = ["1", "2", "3", "4", "5", "6", "C", "4K", "FH", "SS", "LS", "Y"]
     category2int = {value:key for key, value in enumerate(category_list)}
     int2category = {key:value for key, value in enumerate(category_list)}
     player_category = {key:False for key in category_list}
     
-    round = 1
+    round = 0
+    for l in score_list:
+        if l[0] == "x":
+            continue
+        round += 1
     player_deck = []
     com_deck = []
     
@@ -292,8 +345,8 @@ def new_game(score_list):
         
         # 컴퓨터 턴
         print(f"[Computer's Turn ({round}/12)]")
-        #com_deck = roll_dice([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
-        com_deck = [1,1,4,2,3]
+        com_deck = roll_dice([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
+        #com_deck = [3, 4, 5, 6, 6]
         print(f"Roll: {com_deck}")
 
         category = ""
@@ -305,7 +358,7 @@ def new_game(score_list):
             
 
             if reroll_indices == []: 
-                print(f"Which dice to reroll (1~5)? {category}")
+                print(f"Which dice to reroll (1~5)? None({category})")
                 print(f"Roll: {com_deck}")
                 break
             else:
@@ -345,34 +398,43 @@ def new_game(score_list):
 if __name__ == "__main__":
     score_list = [["x", "x"] for i in range(12)]
     total = [0, 0]
+    game = True
 
 
     
     
-    while True:
+    while game:
         print("[Yacht Dice]")
         print("----------------------------------")
         print("1. New Game 2. Load Game 3. Exit")
         print("----------------------------------")
-        menu = int(input("Select a menu: "))
-
-        if menu == 1:
-            new_game(score_list)
-        elif menu == 2:
-            filename = ""
-            while True:
-                filename = input("Enter filename to load:")
-                if not os.path.isfile(filename):
-                    print("File does not exist.")
-                    continue
-                score_list = load_file2list(filename)
-                if check_error(score_list):
-                    print("Invalid file content.")
-                    continue
+        while True:
+            try:
+                menu = int(input("Select a menu: "))
+            except:
+                print("Wrong Input!\n")
+                continue
+            
+            if menu == 1:
+                print("Starting a game...")
+                start_game(score_list)
+            elif menu == 2:
+                filename = ""
+                while True:
+                    filename = input("Enter filename to load: ")
+                    if not os.path.isfile(filename):
+                        print("File does not exist.")
+                        continue
+                    score_list = load_file2list(filename)
+                    if check_error(score_list):
+                        print("Invalid file content.")
+                        continue
+                    break
+                start_game(score_list)
+            elif menu == 3:
+                print("Program ended. Bye!")
+                game = False
                 break
-
-        elif menu == 3:
-            print("Program ended. Bye!")
-            break
-        else:
-            print("Wrong Input!")
+            else:
+                print("Wrong Input!\n")
+    
