@@ -36,12 +36,13 @@ def print_score_board(score_list):
         try:
             total[0] += score_list[j][0]
         except:
-            player_error = True
+            pass
         try:
             total[1] += score_list[j][1]
         except:
-            com_error = True
+            pass
     
+
     if not player_error:
         if sub_total[0] >= 63:
             player_bonus = "35"
@@ -54,25 +55,8 @@ def print_score_board(score_list):
         else:
             com_bonus = "0"
         total[1] += int(com_bonus)
-    # print("┌─────────────────────┬─────────────────────┐")
-    # print("│        Player       │       Computer      │")
-    # print("├─────────────────────┴─────────────────────┤")
-    # for i in range(6):
-    #     print(f"│ {i+1}:          {x_to_blank(score_list[i][0])}      │ {i+1}:          {x_to_blank(score_list[i][1])}      │")
-    # print("├───────────────────────────────────────────┤ ")
-    # print(f"│ Sub total: {sub_total[0]:2d}/63    │ Sub total: {sub_total[1]:2d}/63    │")
-    # print(f" │ +35 bonus:          │ +35 bonus:          │")
-    # print("├───────────────────────────────────────────┤ ")
-    # print(f"│ C:          {x_to_blank(score_list[6][0])}      │ C:          {x_to_blank(score_list[6][1])}      │")
-    # print("├───────────────────────────────────────────┤ ")
-    # for j in range(7, 12):
-    #     print(f"│ {category_list[j]}:         {x_to_blank(score_list[j][0])}      │ {category_list[j]}:         {x_to_blank(score_list[j][1])}      │")
-    # print("├───────────────────────────────────────────┤ ")
-    # print(f"│ Total:     {total[0]:3d}      │ Total:     {total[1]:3d}      │")
-    # print("└───────────────────────────────────────────┘")
 
-    print(f"""
-┌─────────────────────┬─────────────────────┐
+    print(f"""┌─────────────────────┬─────────────────────┐
 │        Player       │       Computer      │
 ├─────────────────────┴─────────────────────┤
 │ 1:          {x_to_blank(score_list[0][0])}      │ 1:          {x_to_blank(score_list[0][1])}      │
@@ -83,7 +67,7 @@ def print_score_board(score_list):
 │ 6:          {x_to_blank(score_list[5][0])}      │ 6:          {x_to_blank(score_list[5][1])}      │
 ├───────────────────────────────────────────┤                     
 │ Sub total: {sub_total[0]:2d}/63    │ Sub total: {sub_total[1]:2d}/63    │
-│ +35 bonus: {player_bonus}         │ +35 bonus: {com_bonus}         │
+│ +35 bonus: {player_bonus:2s}       │ +35 bonus: {com_bonus:2s}       │
 ├───────────────────────────────────────────┤                     
 │ C:          {x_to_blank(score_list[6][0])}      │ C:          {x_to_blank(score_list[6][1])}      │
 ├───────────────────────────────────────────┤
@@ -216,25 +200,25 @@ def calc_score(dice_set, sel):
         return 0
     if sel == "SS":
         for i in range(3):
-            if dice_set[i] != dice_set[i+1] - 1:
+            if sorted_dice_set[i] != sorted_dice_set[i+1] - 1:
                 break
         else:
             return 15
         
         for i in range(1, 4):
-            if dice_set[i] != dice_set[i+1] - 1:
+            if sorted_dice_set[i] != sorted_dice_set[i+1] - 1:
                 break
         else:
             return 15
         return 0
     if sel== "LS":
-        for i in range(5):
-            if dice_set[i] != dice_set[i+1] - 1:
+        for i in range(4):
+            if sorted_dice_set[i] != sorted_dice_set[i+1] - 1:
                 return 0
         else:
             return 30
     if sel == "Y":
-        result = all(e == dice_set[0] for e in dice_set)
+        result = all(e == sorted_dice_set[0] for e in sorted_dice_set)
         if result:
             return 50
         return 0
@@ -254,7 +238,7 @@ def computer_pattern(dice_set, score_list):
             print(int2category[i], score)
             if int2category[i] == "C" and score < 20:
                 continue
-            if score > max_score:
+            if score >= max_score:
                 max_score = score
                 sel = int2category[i]
 
@@ -281,7 +265,7 @@ def start_game(score_list):
     int2category = {key:value for key, value in enumerate(category_list)}
     player_category = {key:False for key in category_list}
     
-    round = 0
+    round = 1
     for l in score_list:
         if l[0] == "x":
             continue
@@ -370,7 +354,8 @@ def start_game(score_list):
                 print(f"\nRoll: {com_deck}")
                 roll_cnt -= 1
 
-        print(f"\nSorted Roll: {com_deck}")
+        print(f"\nSorted Roll: {sorted(com_deck)}")
+        category, reroll_indices = computer_pattern(com_deck, score_list)
         print(f"Choose a category: {category}")
         score_list[category2int[category]][1] = calc_score(com_deck, category)
         print_score_board(score_list)
@@ -416,8 +401,9 @@ if __name__ == "__main__":
                 continue
             
             if menu == 1:
-                print("Starting a game...")
+                print("\nStarting a game...")
                 start_game(score_list)
+                break
             elif menu == 2:
                 filename = ""
                 while True:
