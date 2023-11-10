@@ -85,6 +85,7 @@ def load_file2list(filename):
     score_list = []
     with open(filename, "r") as fr:
         for l in fr:
+            print(l)
             a, b, c = l.split()
             if b != 'x':
                 b = int(b)
@@ -159,7 +160,6 @@ def check_error(score_list):
     return False
     
     
-
 
 def roll_dice(dice_set=[], reroll_indices=[]):
     for e in reroll_indices:
@@ -278,7 +278,7 @@ def start_game(score_list):
         # 플레이어 턴
         print(f"[Player's Turn ({round}/12)]")
         player_deck = roll_dice([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
-
+        
         print(f"Roll: {player_deck}")
 
         roll_cnt = 2
@@ -329,8 +329,8 @@ def start_game(score_list):
         
         # 컴퓨터 턴
         print(f"[Computer's Turn ({round}/12)]")
-        com_deck = roll_dice([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
-        #com_deck = [3, 4, 5, 6, 6]
+        #com_deck = roll_dice([0, 0, 0, 0, 0], [1, 2, 3, 4, 5])
+        com_deck = [3,3,6,3,3]
         print(f"Roll: {com_deck}")
 
         category = ""
@@ -374,11 +374,6 @@ def start_game(score_list):
         print("Draw")
     input("\nPress Enter to continue...")
 
-        
-                
-             
-                
-            
 
 if __name__ == "__main__":
     score_list = [["x", "x"] for i in range(12)]
