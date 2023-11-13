@@ -1,3 +1,5 @@
+# 20230689 박소망
+
 import os
 import random
 
@@ -59,6 +61,7 @@ def print_score_board(score_list):
             com_bonus = "0"
         total[1] += int(com_bonus)
 
+    # score board를 화면에 출력한다
     print(f"""┌─────────────────────┬─────────────────────┐
 │        Player       │       Computer      │
 ├─────────────────────┴─────────────────────┤
@@ -115,6 +118,7 @@ def save_list2file(score_list, int2category):
 # score_list를 파라미터로 받아, 유효한 값들을 가지고 있는지 판단하여 True/False를 반환하는 함수
 def check_error(score_list):
     
+    # score_list에 있는 값들을 'x'가 아니라면 int 타입으로 변경해 준다
     for i in range(len(score_list)):
         for j in range(2):
             if score_list[i][j] != 'x':
@@ -133,7 +137,6 @@ def check_error(score_list):
             if score_list[i-1][j] == "x":
                 continue
             if score_list[i-1][j] not in [0, i, i*2, i*3, i*4, i*5] and score_list[i-1][j] != -1: 
-                print("problem:", type(score_list[i-1][j]))
                 return True
 
     # 카테고리 C에 대하여 오류 확인
@@ -257,6 +260,7 @@ def calc_score(dice_set, sel):
         return 0
         
 
+# 컴퓨터의 동작을 경절하는 함수
 def computer_pattern(dice_set, score_list):
     sel = ""
     max_score = 0
@@ -269,13 +273,14 @@ def computer_pattern(dice_set, score_list):
         if score_list[i][1] == "x":
             sel_left += 1
             score = calc_score(dice_set, int2category[i])
-            print(int2category[i], score)
+            #print(int2category[i], score)
             if int2category[i] == "C" and score < 20:
                 continue
             if score >= max_score:
                 max_score = score
                 sel = int2category[i]
     
+    # 카테고리가 1~6이라면, 그 숫자가 아닌 다른 숫자가 나온 모든 주사위들의 인덱스를 result에 넣어 반환한다.
     if sel in ["1", "2", "3", "4", "5", "6"]:
         for i in range(5):
             if dice_set[i] != int(sel):
@@ -286,13 +291,18 @@ def computer_pattern(dice_set, score_list):
     if max_score == 0:
         result = [1, 2, 3, 4, 5]
     
+    # 카테고리가 "4K", "FH", "SS", "LS", "Y" 중 하나라면 빈 리스트 또는 [1, 2, 3, 4, 5]을 반환한다
     if sel in ["4K", "FH", "SS", "LS", "Y"]: 
         return sel, result
-        
+    
+    # 만약 하나 남은 카테고리가 C이고 20 이하라면 C를 카테고리로 다시 설정해준다.
     if sel_left == 1 and score_list[6][1] == "x":
         sel = "C"
 
+    # 카테고리가 "C"일 때는 3이한 주사위를 모두 굴린다
     if sel == "C":
+        if max_score == 0:
+            result = []
         for i in range(5):
             if dice_set[i] <= 3:
                 result.append(i+1)
@@ -310,8 +320,10 @@ def start_game(score_list):
         if l[0] == "x":
             continue
         round += 1
+    
     player_deck = []
     com_deck = []
+    print("\nStarting a game...")
     print_score_board(score_list)
 
     # 12라운드까지 게임을 진행한다
@@ -338,6 +350,15 @@ def start_game(score_list):
             try: 
                 reroll_indices = list(map(int, user_input.split()))
                 
+                
+                # 만약 reroll_indices에 있는 모든 정수들이 1~5 범위에 있지 않으면 엔터를 친 것과 같은 효과를 낸다
+                for e in reroll_indices:
+                    if e in [1, 2, 3, 4, 5]:
+                        break
+                else:
+                    reroll_indices = []
+
+                # 엔터를 쳐서 아무것도 들어오지 않았을 때
                 if reroll_indices == []:
                     break
 
@@ -352,7 +373,7 @@ def start_game(score_list):
         # 플레이어 주사위를 다 돌렸다면, 카테고리를 입력 받는다. 
         category = input("Choose a category: ")
         while True:
-            if category == "Q":
+            if category.upper() == "Q":
                 save_list2file(score_list, int2category)
                 return
             category = category.upper()
@@ -414,6 +435,7 @@ def start_game(score_list):
         input("Press Enter to continue...")
         clear_screen()
     
+    # 12 라운드가 끝나고 승패를 출력한다
     print("<Final Score Board>")
     print_score_board(score_list)
     if total[0] > total[1]:
@@ -427,20 +449,20 @@ def start_game(score_list):
 
 if __name__ == "__main__":
 
-    # score_list 초기화 및 변수 선엄
-    score_list = [["x", "x"] for i in range(12)]
-
     category_list = ["1", "2", "3", "4", "5", "6", "C", "4K", "FH", "SS", "LS", "Y"]
     # 카테고리에서 int로 변환할 때 사용하는 딕셔너리
     category2int = {value:key for key, value in enumerate(category_list)}
     # int에서 카테고리로 변환할 때 사용하는 딕셔너리
     int2category = {key:value for key, value in enumerate(category_list)}
 
-    total = [0, 0]
     game = True
     
     # 메인 게임 실행을 위한 while loop
     while game:
+        # score_list 초기화 및 변수 선엄
+        score_list = [["x", "x"] for i in range(12)]
+        total = [0, 0]
+        
         print("[Yacht Dice]")
         print("----------------------------------")
         print("1. New Game 2. Load Game 3. Exit")
@@ -457,7 +479,6 @@ if __name__ == "__main__":
                 continue
             
             if menu == 1:                                       # menu가 1이면 게임 실행
-                print("\nStarting a game...")
                 start_game(score_list)
                 break
             elif menu == 2:                                     # menu가 2이면 파일 로드
