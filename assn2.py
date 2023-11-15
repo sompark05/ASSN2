@@ -136,7 +136,7 @@ def check_error(score_list):
         for j in range(2):
             if score_list[i-1][j] == "x":
                 continue
-            if score_list[i-1][j] not in [0, i, i*2, i*3, i*4, i*5] and score_list[i-1][j] != -1: 
+            if score_list[i-1][j] not in [0, i, i*2, i*3, i*4, i*5]: 
                 return True
 
     # 카테고리 C에 대하여 오류 확인
@@ -162,6 +162,8 @@ def check_error(score_list):
             pass
         elif (score_list[8][k] < 5 or score_list[8][k] > 30)and score_list[8][k] != 0:   # FH
             return True
+        elif score_list[8][k] == 6 or score_list[8][k] == 29:
+            return True 
         
         # 카테고리 SS에 대하여 오류 확인
         if score_list[9][k] == "x":
